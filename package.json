@@ -5,7 +5,7 @@
     "main": "index.js",
     "scripts": {
         "build": "tsc",
-        "start": "node build/index.js",
+        "start": "node --inspect-brk=0.0.0.0 build/index.js",
         "format": "prettier 'src/'",
         "prepare": "husky install",
         "lint": "tslint --project ."
@@ -40,6 +40,7 @@
     },
     "dependencies": {
         "@pokt-network/pocket-js": "^0.7.1-rc",
+        "bns": "^0.15.0",
         "ethers": "^5.5.3",
         "express": "^4.17.2",
         "express-body-parser-error-handler": "^1.0.4",
