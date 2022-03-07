@@ -7,7 +7,7 @@ import bodyParserErrorHandler from "express-body-parser-error-handler";
 
 const {NodeClient} = require("hs-client");
 const bns = require('bns');
-const {StubResolver} = bns;
+const {StubResolver, RecursiveResolver} = bns;
 const {CNAMERecord, ARecord, AAAARecord} = require('bns/lib/wire.js');
 const express = require("express");
 
@@ -160,13 +160,13 @@ rpcMethods['dnslookup'] = async function (args: any, context: object) {
         throw  new Error('Invalid Chain');
     }
 
-    let dns = new StubResolver({
-                                   tcp: true,
-                                   inet6: true,
-                                   edns: true,
-                                   dnssec: true
-                               });
-    await dns.open();
+    let dns;
+    const resolverOpt = {
+        tcp: true,
+        inet6: true,
+        edns: true,
+        dnssec: true
+    };
 
     let dnsResult;
     let domain = args.domain;
@@ -175,13 +175,18 @@ rpcMethods['dnslookup'] = async function (args: any, context: object) {
     if (ns) {
         if (!/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
             ns)) {
+            dns = new RecursiveResolver(resolverOpt);
+            dns.hints.setDefault();
+            await dns.open();
             try {
                 dnsResult = await dns.lookup(ns);
             } catch (e) {
                 error = e;
             }
         } else {
+            dns = new StubResolver(resolverOpt);
             dns.setServers([ns]);
+            await dns.open();
             try {
                 dnsResult = await dns.lookup(domain);
             } catch (e) {
@@ -189,6 +194,9 @@ rpcMethods['dnslookup'] = async function (args: any, context: object) {
             }
         }
     } else {
+        dns = new RecursiveResolver(resolverOpt);
+        dns.hints.setDefault();
+        await dns.open();
         try {
             dnsResult = await dns.lookup(domain);
         } catch (e) {
@@ -205,7 +213,9 @@ rpcMethods['dnslookup'] = async function (args: any, context: object) {
             return item.data instanceof CNAMERecord || item.data instanceof ARecord || item.data
                    instanceof AAAARecord;
         });
-
+        if (!records.length) {
+            return false;
+        }
         let record = records.pop().data;
 
         dnsResult = record.target ?? record.address ?? false;
