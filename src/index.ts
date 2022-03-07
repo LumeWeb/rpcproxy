@@ -7,7 +7,7 @@ import bodyParserErrorHandler from "express-body-parser-error-handler";
 
 const {NodeClient} = require("hs-client");
 const bns = require('bns');
-const {StubResolver, RecursiveResolver, dns} = bns;
+const {StubResolver, RecursiveResolver} = bns;
 const {CNAMERecord, ARecord, AAAARecord} = require('bns/lib/wire.js');
 const express = require("express");
 
@@ -30,6 +30,16 @@ let pocketServer: Pocket;
 let usePocketGateway = true;
 let gatewayProviders: { [name: string]: ethers.providers.JsonRpcProvider } = {};
 let rpcMethods: { [name: string]: Function } = {};
+const resolverOpt = {
+    tcp: true,
+    inet6: false,
+    edns: true,
+    dnssec: true
+};
+
+const globalResolver = new RecursiveResolver(resolverOpt);
+globalResolver.hints.setDefault();
+globalResolver.open();
 
 if (!POCKET_APP_ID || !POCKET_APP_KEY) {
     const dispatchURL = new URL("http://rpcproxy:8081")
@@ -86,6 +96,40 @@ function isIp(ip: string) {
     return /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
         ip
     );
+}
+
+async function resolveNameServer(ns: string): Promise<string | boolean> {
+    if (isIp(ns)) {
+        return ns;
+    }
+    let result = await getDnsRecords(ns, 'A');
+
+    if (result.length) {
+        return result[0];
+    }
+
+    return false;
+}
+
+async function getDnsRecords(domain: string, type: string, authority: boolean = false,
+                             resolver = globalResolver): Promise<string[]> {
+    let result;
+
+    try {
+        result = await resolver.lookup(domain, type);
+    } catch (e) {
+        return [];
+    }
+
+    let prop = authority ? 'authority' : 'answer';
+
+    if (!result || !result[prop].length) {
+        return [];
+    }
+
+    return result[prop].map(
+        // @ts-ignore
+        (item: object) => item.data.address ?? item.data.target ?? item.data.ns ?? null);
 }
 
 // This is only called once to setup the Pocket Instance and AAT
@@ -161,67 +205,48 @@ rpcMethods['getnameresource'] = async function (args: any, context: object) {
     return await hnsClient.execute('getnameresource', args);
 };
 rpcMethods['dnslookup'] = async function (args: any, context: object) {
-    // @ts-ignore
-    if ('icann' !== context.req.query.chain) {
-        throw  new Error('Invalid Chain');
-    }
-
-    let dnsResult;
+    let dnsResults: string[] = [];
     let domain = args.domain;
     let ns = args.nameserver;
-    let error;
-    const resolverOpt = {
-        tcp: true,
-        inet6: false,
-        edns: true,
-        dnssec: true
-    };
-    let dnsResolver = ns ? new StubResolver(resolverOpt) : new RecursiveResolver(resolverOpt);
-    if (ns) {
-        let nsIp;
-        if (!isIp(ns)) {
-            try {
-                nsIp = await dns.resolve4(ns);
-            } catch (e) {
-                return false;
-            }
-            if (!nsIp || !nsIp.length) {
-                return false;
-            }
-            ns = nsIp.pop();
-        }
-        dnsResolver.setServers([ns]);
-    } else {
-        dnsResolver.hints.setDefault();
-    }
-
+    let dnsResolver = ns ? new StubResolver(resolverOpt) : globalResolver;
     await dnsResolver.open();
 
-    try {
-        dnsResult = await dnsResolver.lookup(domain);
-    } catch (e) {
-        error = e;
+    if (ns) {
+        let nextNs = ns;
+        let prevNs = null;
+
+        while (nextNs) {
+            nextNs = await resolveNameServer(nextNs);
+            if (!nextNs) {
+                nextNs = prevNs;
+            }
+
+            dnsResolver.setServers([nextNs]);
+
+            if (nextNs === prevNs) {
+                break;
+            }
+            let result = await getDnsRecords(domain, 'NS', true, dnsResolver);
+            prevNs = nextNs;
+            nextNs = result.length ? result[0] : false;
+        }
+    }
+
+    for (const queryType of ['CNAME', 'A']) {
+        let result = await getDnsRecords(domain, queryType, false, dnsResolver);
+
+        if (result) {
+            dnsResults = dnsResults.concat(result);
+        }
     }
 
     await dnsResolver.close();
 
-    if (dnsResult) {
-        let records = dnsResult.answer.filter(function (item: object) {
-            // @ts-ignore
-            return item.data instanceof CNAMERecord || item.data instanceof ARecord || item.data
-                   instanceof AAAARecord;
-        });
-        if (!records.length) {
-            return false;
-        }
-        let record = records.pop().data;
-
-        dnsResult = record.target ?? record.address ?? false;
-
-        return dnsResult;
+    if (dnsResults.length) {
+        return dnsResults[0];
     }
 
-    throw error;
+    return false;
 };
 
 ['eth_call', 'eth_chainId', 'net_version'].forEach((method) => {
