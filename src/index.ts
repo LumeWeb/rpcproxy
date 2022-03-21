@@ -62,6 +62,9 @@ webServer.use(function (req, res, next) {
     if (req.body && !req.body.jsonrpc) {
         req.body.jsonrpc = '2.0';
     }
+    if (req.headers['x-chain']) {
+        req.query.chain = req.headers['x-chain'];
+    }
 
     jsonServer.call(req.body, context, function (err, result) {
         if (err) {
