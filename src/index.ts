@@ -270,6 +270,6 @@ jsonServer = new JSONServer(
     }
 
     webServer.listen(proxyPort, () => {
-        console.log(`Pocket DNS Proxy listening on port ${proxyPort}`)
+        console.log(`RPC Proxy listening on port ${proxyPort}`)
     });
 })();
