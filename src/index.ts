@@ -8,7 +8,6 @@ import bodyParserErrorHandler from "express-body-parser-error-handler";
 const {NodeClient} = require("hs-client");
 const bns = require('bns');
 const {StubResolver, RecursiveResolver} = bns;
-const {CNAMERecord, ARecord, AAAARecord} = require('bns/lib/wire.js');
 const express = require("express");
 
 const POCKET_APP_ID = process.env.POCKET_APP_ID || false;
