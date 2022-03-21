@@ -1,11 +1,11 @@
 {
-    "name": "portal-service-pokt",
-    "version": "1.0.0",
+    "name": "@lumeweb/portal-rpcproxy",
+    "version": "0.1.0",
     "description": "",
     "main": "index.js",
     "scripts": {
         "build": "tsc",
-        "start": "node --inspect-brk=0.0.0.0 build/index.js",
+        "start": "node build/index.js",
         "format": "prettier 'src/'",
         "prepare": "husky install",
         "lint": "tslint --project ."
