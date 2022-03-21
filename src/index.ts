@@ -23,6 +23,9 @@ const hsdPort = Number(process.env.HSD_PORT) || 12037;
 const hsdApiKey = process.env.HSD_API_KEY || "foo";
 const proxyPort: Number = 80;
 
+const pocketHost =  process.env.POCKET_HOST || "pocket";
+const pockerPort =  process.env.POCKET_PORT || 8081;
+
 let jsonServer: JSONServer;
 let aat: PocketAAT;
 let pocketServer: Pocket;
@@ -41,7 +44,7 @@ globalResolver.hints.setDefault();
 globalResolver.open();
 
 if (!POCKET_APP_ID || !POCKET_APP_KEY) {
-    const dispatchURL = new URL("http://rpcproxy:8081")
+    const dispatchURL = new URL(`http://${pocketHost}:${pockerPort}`)
     const rpcProvider = new HttpRpcProvider(dispatchURL)
     const configuration = new Configuration()
     pocketServer = new Pocket([dispatchURL], rpcProvider, configuration)
