@@ -35,6 +35,7 @@ jobs:
         with:
           images: |
             ${{ github.repository }}
+            ghcr.io/${{ github.repository }}
 
 
       - name: Build and push Docker images
