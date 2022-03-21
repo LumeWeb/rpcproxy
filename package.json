@@ -1,5 +1,5 @@
 {
-    "name": "@lumeweb/portal-rpcproxy",
+    "name": "@lumeweb/rpcproxy",
     "version": "0.1.0",
     "description": "",
     "main": "index.js",
