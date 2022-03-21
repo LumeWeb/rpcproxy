@@ -5,6 +5,8 @@ ARG branch=master
 
 WORKDIR /
 
+RUN apt install libunbound-dev -y
+
 RUN git clone --single-branch --branch ${branch} https://github.com/LumeWeb/rpcproxy.git app
 
 WORKDIR /app
