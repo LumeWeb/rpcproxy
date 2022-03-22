@@ -18,9 +18,9 @@
     "author": "",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/LumeWeb/portal-service-pokt/issues"
+        "url": "https://github.com/LumeWeb/rpcproxy/issues"
     },
-    "homepage": "https://github.com/LumeWeb/portal-service-pokt#readme",
+    "homepage": "https://github.com/LumeWeb/rpcproxy#readme",
     "husky": {
         "hooks": {
             "pre-commit": "pretty-quick --staged"
