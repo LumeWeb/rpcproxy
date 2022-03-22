@@ -1,15 +1,11 @@
 FROM node:latest
 LABEL maintainer="Derick Hammer <contact@lumeweb.com>"
 
-ARG branch=master
-
-WORKDIR /
-
 RUN apt update && apt install libunbound-dev -y
 
-RUN git clone --single-branch --branch ${branch} https://github.com/LumeWeb/rpcproxy.git app
-
 WORKDIR /app
+
+ADD src *.json yarn.lock ./
 
 # Install all dependencies needed for production build
 RUN yarn && yarn build
