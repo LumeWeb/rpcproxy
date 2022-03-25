@@ -234,7 +234,6 @@ rpcMethods['dnslookup'] = async function (args: any, context: object) {
             let result = await getDnsRecords(domain, 'NS', true, dnsResolver);
             prevNs = nextNs;
             nextNs = result.length ? result[0] : false;
-            console.log('nextNs', nextNs);
         }
     }
 
