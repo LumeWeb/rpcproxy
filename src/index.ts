@@ -89,7 +89,6 @@ function maybeMapChainId(chain: string): string | boolean {
         return chainNetworks[chain];
     }
 
-    var num = parseInt(chain, 16);
     if ([parseInt(chain, 16).toString(), parseInt(chain, 10).toString()].includes(chain.toLowerCase())) {
         return chain;
     }
