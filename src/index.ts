@@ -96,6 +96,16 @@ function maybeMapChainId(chain: string): string | boolean {
     return false;
 }
 
+function reverseMapChainId(chainId: string): string | boolean {
+
+    let vals = Object.values(chainNetworks);
+    if (!vals.includes(chainId)) {
+        return false;
+    }
+
+    return Object.keys(chainNetworks)[vals.indexOf(chainId)];
+}
+
 function isIp(ip: string) {
     return /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(
         ip
@@ -179,24 +189,31 @@ function proxyEvmRpcMethod(method: string): Function {
     return async function (args: any, context: object) {
         // @ts-ignore
         let chain = context.req.query.chain;
+        let chainId = maybeMapChainId(chain);
+
+        if (!chainId) {
+            throw new Error('Invalid Chain');
+        }
+
         if (usePocketGateway) {
+            chainId = reverseMapChainId(chainId as string);
+            if (!chainId) {
+                throw new Error('Invalid Chain');
+            }
+            
             let provider = gatewayProviders[chain] || false;
             if (!provider) {
                 provider =
                     new ethers.providers.JsonRpcProvider({
-                        url: `https://${chain}.gateway.pokt.network/v1/lb/${POCKET_APP_ID}`,
+                        url: `https://${chainId}.gateway.pokt.network/v1/lb/${POCKET_APP_ID}`,
                         password: <string>POCKET_APP_KEY
                     })
             }
             gatewayProviders[chain] = provider;
             return await provider.send(method, args);
-        } else {
-            let chainId = maybeMapChainId(chain);
-            if (!chainId) {
-                throw  new Error('Invalid Chain');
-            }
-            return await sendRelay(JSON.stringify(args), <string>chainId, aat);
         }
+
+        return await sendRelay(JSON.stringify(args), <string>chainId, aat);
     }
 }
 
