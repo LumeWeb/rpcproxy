@@ -200,8 +200,8 @@ function proxyEvmRpcMethod(method: string): Function {
             if (!chainId) {
                 throw new Error('Invalid Chain');
             }
-            
-            let provider = gatewayProviders[chain] || false;
+
+            let provider = gatewayProviders[chainId as string] || false;
             if (!provider) {
                 provider =
                     new ethers.providers.JsonRpcProvider({
@@ -209,7 +209,7 @@ function proxyEvmRpcMethod(method: string): Function {
                         password: <string>POCKET_APP_KEY
                     })
             }
-            gatewayProviders[chain] = provider;
+            gatewayProviders[chainId as string] = provider;
             return await provider.send(method, args);
         }
 
