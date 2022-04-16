@@ -23,8 +23,8 @@ const hsdPort = Number(process.env.HSD_PORT) || 12037;
 const hsdApiKey = process.env.HSD_API_KEY || "foo";
 const proxyPort: Number = 80;
 
-const pocketHost =  process.env.POCKET_HOST || "pocket";
-const pockerPort =  process.env.POCKET_PORT || 8081;
+const pocketHost = process.env.POCKET_HOST || "pocket";
+const pockerPort = process.env.POCKET_PORT || 8081;
 
 let jsonServer: JSONServer;
 let aat: PocketAAT;
@@ -90,7 +90,7 @@ function maybeMapChainId(chain: string): string | boolean {
     }
 
     var num = parseInt(chain, 16);
-    if (num.toString(16) === chain.toLowerCase()) {
+    if ([parseInt(chain, 16).toString(), parseInt(chain, 10).toString()].includes(chain.toLowerCase())) {
         return chain;
     }
 
@@ -185,9 +185,9 @@ function proxyEvmRpcMethod(method: string): Function {
             if (!provider) {
                 provider =
                     new ethers.providers.JsonRpcProvider({
-                                                             url: `https://${chain}.gateway.pokt.network/v1/lb/${POCKET_APP_ID}`,
-                                                             password: <string>POCKET_APP_KEY
-                                                         })
+                        url: `https://${chain}.gateway.pokt.network/v1/lb/${POCKET_APP_ID}`,
+                        password: <string>POCKET_APP_KEY
+                    })
             }
             gatewayProviders[chain] = provider;
             return await provider.send(method, args);
@@ -271,7 +271,7 @@ jsonServer = new JSONServer(
     if (!usePocketGateway) {
         aat =
             await unlockAccount(<string>POCKET_ACCOUNT_PRIVATE_KEY,
-                                <string>POCKET_ACCOUNT_PUBLIC_KEY, '0');
+                <string>POCKET_ACCOUNT_PUBLIC_KEY, '0');
     }
 
     webServer.listen(proxyPort, () => {
