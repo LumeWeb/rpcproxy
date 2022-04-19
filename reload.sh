@@ -8,8 +8,6 @@ fi
 
 while true; do
   inotifywait -e create -e modify --include ".reload" /data
-  killall -9 node
-  npm start
-  echo "RPC Proxy Restarted"
   rm -f /data/.reload
+  killall -9 node
 done
