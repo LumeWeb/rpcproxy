@@ -7,7 +7,7 @@ if [ ! -d /data ]; then
 fi
 
 while true; do
-  inotifywait -e create -e modify --include ".reload" /data
+  inotifywait -q -e create -e modify --include ".reload" /data
   rm -f /data/.reload
   killall -9 node
 done
