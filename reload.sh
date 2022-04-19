@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -x
+
 if [ ! -d /data ]; then
     exit 0
 fi
