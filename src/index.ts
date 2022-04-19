@@ -9,6 +9,7 @@ const {NodeClient} = require("hs-client");
 const bns = require('bns');
 const {StubResolver, RecursiveResolver} = bns;
 const express = require("express");
+const enableDestroy = require("server-destroy");
 
 const POCKET_APP_ID = process.env.POCKET_APP_ID || false;
 const POCKET_APP_KEY = process.env.POCKET_APP_KEY || false;
@@ -289,8 +290,14 @@ jsonServer = new JSONServer(
             await unlockAccount(<string>POCKET_ACCOUNT_PRIVATE_KEY,
                 <string>POCKET_ACCOUNT_PUBLIC_KEY, '0');
     }
-
+    enableDestroy(webServer);
     webServer.listen(proxyPort, () => {
         console.log(`RPC Proxy listening on port ${proxyPort}`)
     });
 })();
+
+process.on('SIGTERM', function () {
+    // @ts-ignore
+    webServer.destroy();
+    process.exit(0);
+});
