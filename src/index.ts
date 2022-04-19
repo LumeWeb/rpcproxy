@@ -55,7 +55,7 @@ if (!POCKET_APP_ID || !POCKET_APP_KEY) {
     const rpcProvider = new HttpRpcProvider(dispatchURL)
     const configuration = new Configuration()
     pocketServer = new Pocket([dispatchURL], rpcProvider, configuration)
-    usePocketGateway = false;
+  //  usePocketGateway = false;
 }
 webServer.use(function (req, res, next) {
     if (!req.headers['content-type']) {
