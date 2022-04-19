@@ -13,6 +13,10 @@ const {StubResolver, RecursiveResolver} = bns;
 const express = require("express");
 const enableDestroy = require("server-destroy");
 
+if (fs.existsSync('/data/.env')) {
+    dotenv.config({path: '/data/.env'});
+}
+
 const POCKET_APP_ID = process.env.POCKET_APP_ID || false;
 const POCKET_APP_KEY = process.env.POCKET_APP_KEY || false;
 const POCKET_ACCOUNT_PUBLIC_KEY = process.env.POCKET_ACCOUNT_PUBLIC_KEY || false;
@@ -28,10 +32,6 @@ const proxyPort: Number = 80;
 
 const pocketHost = process.env.POCKET_HOST || "pocket";
 const pockerPort = process.env.POCKET_PORT || 8081;
-
-if (fs.existsSync('/data/.env')) {
-    dotenv.config({path: '/data/.env'});
-}
 
 let jsonServer: JSONServer;
 let aat: PocketAAT;
