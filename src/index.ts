@@ -4,6 +4,8 @@ import {Server as JSONServer} from 'jayson/promise'
 import {Express} from "express";
 // @ts-ignore
 import bodyParserErrorHandler from "express-body-parser-error-handler";
+import dotenv from "dotenv";
+import fs from "fs";
 
 const {NodeClient} = require("hs-client");
 const bns = require('bns');
@@ -26,6 +28,10 @@ const proxyPort: Number = 80;
 
 const pocketHost = process.env.POCKET_HOST || "pocket";
 const pockerPort = process.env.POCKET_PORT || 8081;
+
+if (fs.existsSync('/data/.env')) {
+    dotenv.config({path: '/data/.env'});
+}
 
 let jsonServer: JSONServer;
 let aat: PocketAAT;
