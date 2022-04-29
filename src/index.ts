@@ -181,24 +181,23 @@ async function unlockAccount(accountPrivateKey: string, accountPublicKey: string
         process.exit(1);
     }
 }
-
-// Call this every time you want to fetch RPC data
-async function sendRelay(rpcQuery: string, blockchain: string, pocketAAT: PocketAAT) {
-    try {
-        return await pocketServer.sendRelay(rpcQuery, blockchain, pocketAAT)
-    } catch (e) {
-        console.log(e)
-        throw e;
-    }
+function proxyEvmRpcMethod(method: string): Function {
+    return proxyRpcMethod(method);
 }
 
-function proxyEvmRpcMethod(method: string): Function {
+function proxyRpcMethod(method: string, chains: string[] = []): Function {
     return async function (args: any, context: object) {
         // @ts-ignore
         let chain = context.req.query.chain;
         let chainId = maybeMapChainId(chain);
 
-        if (!chainId) {
+        let chainMatch = true;
+
+        if(chains.length > 0 && (!chains.includes(chain) && !chains.includes(chainId.toString()))){
+            chainMatch = false;
+        }
+
+        if (!chainId || !chainMatch) {
             throw new Error('Invalid Chain');
         }
 
@@ -223,6 +222,23 @@ function proxyEvmRpcMethod(method: string): Function {
         return await sendRelay(JSON.stringify(args), <string>chainId, aat);
     }
 }
+
+// Call this every time you want to fetch RPC data
+async function sendRelay(rpcQuery: string, blockchain: string, pocketAAT: PocketAAT) {
+    try {
+        return await pocketServer.sendRelay(rpcQuery, blockchain, pocketAAT)
+    } catch (e) {
+        console.log(e)
+        throw e;
+    }
+}
+
+['eth_call', 'eth_chainId', 'net_version'].forEach((method) => {
+    rpcMethods[method] = proxyEvmRpcMethod(method);
+})
+
+rpcMethods['getAccountInfo'] = proxyRpcMethod('getAccountInfo', [chainNetworks["sol-mainnet"]]);
+
 
 rpcMethods['getnameresource'] = async function (args: any, context: object) {
     // @ts-ignore
@@ -278,10 +294,6 @@ rpcMethods['dnslookup'] = async function (args: any, context: object) {
 
     return false;
 };
-
-['eth_call', 'eth_chainId', 'net_version'].forEach((method) => {
-    rpcMethods[method] = proxyEvmRpcMethod(method);
-})
 
 jsonServer = new JSONServer(
     rpcMethods,
