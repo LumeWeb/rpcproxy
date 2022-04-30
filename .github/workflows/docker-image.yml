@@ -44,5 +44,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: latest
+          tags: ${{ steps.lowercase_repo.outputs.REPO }}:latest
           labels: ${{ steps.meta.outputs.labels }}
