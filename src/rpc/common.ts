@@ -17,13 +17,13 @@ const gatewayMethods: { [name: string]: (chainId: string) => RpcProviderMethod }
             url: `https://${chainId}.gateway.pokt.network/v1/lb/${POCKET_APP_ID}`,
             password: <string>POCKET_APP_KEY
         })
-        return provider.send;
+        return provider.send.bind(provider);
     },
     "sol-mainnet": (chainId: string): RpcProviderMethod => {
         const provider = new Connection(`https://solana-mainnet.gateway.pokt.network/v1/lb/${POCKET_APP_ID}`)
 
         // @ts-ignore
-        return provider._rpcRequest;
+        return provider._rpcRequest.bind(provider);
     }
 };
 
