@@ -20,7 +20,7 @@ const gatewayMethods: { [name: string]: (chainId: string) => RpcProviderMethod }
         return provider.send;
     },
     "sol-mainnet": (chainId: string): RpcProviderMethod => {
-        const provider = new Connection(`https://${chainId}.gateway.pokt.network/v1/lb/${POCKET_APP_ID}`)
+        const provider = new Connection(`https://solana-mainnet.gateway.pokt.network/v1/lb/${POCKET_APP_ID}`)
 
         // @ts-ignore
         return provider._rpcRequest;
