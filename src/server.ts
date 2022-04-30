@@ -2,7 +2,7 @@ import {Configuration, HttpRpcProvider, Pocket, PocketAAT} from "@pokt-network/p
 import {pockerPort, POCKET_APP_ID, POCKET_APP_KEY, pocketHost, updateUsePocketGateway} from "./env.js";
 import express, {Express} from "express";
 import {Server as JSONServer} from "jayson/promise";
-import rpcMethods from "./rpc/evm.js";
+import {rpcMethods} from "./rpc/index.js";
 
 export let pocketServer: Pocket;
 let _aat: PocketAAT;
