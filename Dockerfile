@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:16
 LABEL maintainer="Derick Hammer <contact@lumeweb.com>"
 
 ARG INOTIFY_VERSION="3.20.2.2"
