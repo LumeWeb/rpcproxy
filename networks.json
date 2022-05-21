@@ -1,5 +1,6 @@
 {
     "algorand-mainnet": "29",
+    "algorand-mainnet-indexer": "dummy",
     "algorand-archival": "000D",
     "algorand-testnet": "45",
     "algorand-testnet-archival": "0A45",
