@@ -15,7 +15,7 @@ export const hsdNetworkType = process.env.HSD_NETWORK || "main";
 export const hsdHost = process.env.HSD_HOST || "handshake";
 export const hsdPort = Number(process.env.HSD_PORT) || 12037;
 export const hsdApiKey = process.env.HSD_API_KEY || "foo";
-export const proxyPort: Number = 80;
+export const proxyPort: Number = 8080;
 
 export const pocketHost = process.env.POCKET_HOST || "pocket";
 export const pockerPort = process.env.POCKET_PORT || 8081;
